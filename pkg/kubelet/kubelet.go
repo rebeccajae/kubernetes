@@ -492,6 +492,11 @@ func NewMainKubelet(kubeCfg *kubeletconfiginternal.KubeletConfiguration,
 		protocol = utilipt.ProtocolIPv6
 	}
 
+	externalHealthz := &externalHealthz{
+		interval: kubeCfg.ExternalHealthzPeriod.Duration,
+		port:     *kubeCfg.ExternalHealthzPort,
+	}
+
 	klet := &Kubelet{
 		hostname:                                hostname,
 		hostnameOverridden:                      hostnameOverridden,
@@ -545,6 +550,7 @@ func NewMainKubelet(kubeCfg *kubeletconfiginternal.KubeletConfiguration,
 		experimentalHostUserNamespaceDefaulting: utilfeature.DefaultFeatureGate.Enabled(features.ExperimentalHostUserNamespaceDefaultingGate),
 		keepTerminatedPodVolumes:                keepTerminatedPodVolumes,
 		nodeStatusMaxImages:                     nodeStatusMaxImages,
+		externalHealthz:                         externalHealthz,
 	}
 
 	if klet.cloud != nil {
@@ -672,6 +678,9 @@ func NewMainKubelet(kubeCfg *kubeletconfiginternal.KubeletConfiguration,
 	if _, err := klet.updatePodCIDR(kubeCfg.PodCIDR); err != nil {
 		klog.Errorf("Pod CIDR update failed %v", err)
 	}
+
+	klet.externalHealthz.periodicallyCheckExternalHealthz()
+	klet.runtimeState.addHealthCheck("NCC", klet.externalHealthz.getLastStatus)
 
 	// setup containerGC
 	containerGC, err := kubecontainer.NewContainerGC(klet.containerRuntime, containerGCPolicy, klet.sourcesReady)
@@ -1159,6 +1168,9 @@ type Kubelet struct {
 
 	// Handles RuntimeClass objects for the Kubelet.
 	runtimeClassManager *runtimeclass.Manager
+
+	// External Node Health Checks
+	externalHealthz *externalHealthz
 }
 
 // setupDataDirs creates:

@@ -357,6 +357,11 @@ type KubeletConfiguration struct {
 	// The purpose of this format is make sure you have the opportunity to notice if the next release hides additional metrics,
 	// rather than being surprised when they are permanently removed in the release after that.
 	ShowHiddenMetricsForVersion string
+	// externalHealthzPort is the port of an external node-local healthz endpoint to query
+	// periodically to indicate node health that the kubelet is unable to determine (set to 0 to disable)
+	ExternalHealthzPort *int32
+	// How frequently to check the external healthz endpoint
+	ExternalHealthzPeriod metav1.Duration
 }
 
 // KubeletAuthorizationMode denotes the authorization mode for the kubelet

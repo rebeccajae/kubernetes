@@ -793,6 +793,15 @@ type KubeletConfiguration struct {
 	// Default: false
 	// +optional
 	KernelMemcgNotification bool `json:"kernelMemcgNotification,omitempty"`
+	// externalHealthzPort is the port of an external node-local healthz endpoint to query
+	// periodically to indicate node health that the kubelet is unable to determine (set to 0 to disable)
+	// Default: 0
+	// +optional
+	ExternalHealthzPort *int32 `json:"externalHealthzPort,omitempty"`
+	// How frequently to check the external healthz endpoint
+	// Default: "10s"
+	// +optional
+	ExternalHealthzPeriod metav1.Duration `json:"externalHealthzPeriod,omitempty"`
 }
 
 type KubeletAuthorizationMode string

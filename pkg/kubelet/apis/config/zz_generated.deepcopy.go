@@ -185,6 +185,12 @@ func (in *KubeletConfiguration) DeepCopyInto(out *KubeletConfiguration) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.ExternalHealthzPort != nil {
+		in, out := &in.ExternalHealthzPort, &out.ExternalHealthzPort
+		*out = new(int32)
+		**out = **in
+	}
+	out.ExternalHealthzPeriod = in.ExternalHealthzPeriod
 	return
 }
 
